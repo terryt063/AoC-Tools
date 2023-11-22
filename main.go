@@ -30,6 +30,8 @@ func main() {
 		for i := 1; i < 26; i++ {
 			writeFiles(*yearFlag, fmt.Sprint(i))
 		}
+	} else {
+		writeFiles(*yearFlag, *dayFlag)
 	}
 
 }
