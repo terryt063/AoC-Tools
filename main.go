@@ -29,6 +29,7 @@ func main() {
 	if *dayFlag == "all" {
 		for i := 1; i < 26; i++ {
 			writeFiles(*yearFlag, fmt.Sprint(i))
+			time.Sleep(30 * time.Second)
 		}
 	} else {
 		writeFiles(*yearFlag, *dayFlag)
@@ -37,7 +38,6 @@ func main() {
 }
 
 func writeFiles(year string, day string) error {
-	time.Sleep(30 * time.Second)
 	fmt.Println("Getting the details for AoC", year, "Day", day, "...")
 	// Create the directory for the file...
 	err := os.MkdirAll(fmt.Sprintf("./%s/day%s/", year, day), os.ModePerm)
@@ -68,6 +68,7 @@ func writeFiles(year string, day string) error {
 	inputFile.WriteString(inputText)
 	defer inputFile.Close()
 	return nil
+
 }
 
 func requestData(url string) *http.Response {
@@ -84,7 +85,6 @@ func requestData(url string) *http.Response {
 	if err != nil {
 		log.Panic("The request failed. Error -", err.Error())
 	}
-	defer response.Body.Close()
 	return response
 }
 
@@ -102,6 +102,7 @@ func getInstructions(year string, day string) (string, error) {
 	url := fmt.Sprintf("https://adventofcode.com/%s/day/%s", year, day)
 
 	response := requestData(url)
+	defer response.Body.Close()
 
 	bodyBytes, _ := io.ReadAll(response.Body)
 	body := string(bodyBytes)
@@ -122,6 +123,7 @@ func getInput(year string, day string) (string, error) {
 	url := fmt.Sprintf("https://adventofcode.com/%s/day/%s/input", year, day)
 
 	response := requestData(url)
+	defer response.Body.Close()
 
 	bodyBytes, _ := io.ReadAll(response.Body)
 	body := string(bodyBytes)
