@@ -24,15 +24,24 @@ func main() {
 	if *dayFlag == "" || *yearFlag == "" {
 		fmt.Println("You must enter an input. The details are below")
 		flag.PrintDefaults()
+		os.Exit(1)
 	}
 
 	if *dayFlag == "all" {
 		for i := 1; i < 26; i++ {
-			writeFiles(*yearFlag, fmt.Sprint(i))
+			err := writeFiles(*yearFlag, fmt.Sprint(i))
+			if err != nil {
+				log.Println(err.Error())
+				os.Exit(1)
+			}
 			time.Sleep(30 * time.Second)
 		}
 	} else {
-		writeFiles(*yearFlag, *dayFlag)
+		err := writeFiles(*yearFlag, *dayFlag)
+		if err != nil {
+			log.Println(err.Error())
+			os.Exit(1)
+		}
 	}
 
 }
@@ -56,7 +65,6 @@ func writeFiles(year string, day string) error {
 	defer file.Close()
 
 	// Now get the Input text
-	time.Sleep(10 * time.Second)
 	inputFile, err := os.Create(fmt.Sprintf("./%s/day%s/input.txt", year, day))
 	if err != nil {
 		return err
@@ -71,7 +79,7 @@ func writeFiles(year string, day string) error {
 
 }
 
-func requestData(url string) *http.Response {
+func requestData(url string) (*http.Response, error) {
 	// Grab the session ID from the .env file...
 	sessionID := loadSessionVariable()
 	// setup the request
@@ -82,10 +90,13 @@ func requestData(url string) *http.Response {
 	req.AddCookie(&http.Cookie{Name: "session", Value: sessionID})
 	client := &http.Client{}
 	response, err := client.Do(req)
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("status code: %s", fmt.Sprint(response.StatusCode))
+	}
 	if err != nil {
 		log.Panic("The request failed. Error -", err.Error())
 	}
-	return response
+	return response, nil
 }
 
 func loadSessionVariable() string {
@@ -101,8 +112,15 @@ func getInstructions(year string, day string) (string, error) {
 	// Setup the request...
 	url := fmt.Sprintf("https://adventofcode.com/%s/day/%s", year, day)
 
-	response := requestData(url)
+	response, err := requestData(url)
+	if err != nil {
+		return "", err
+	}
 	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return "", fmt.Errorf("status code: %s", fmt.Sprint(response.StatusCode))
+	}
 
 	bodyBytes, _ := io.ReadAll(response.Body)
 	body := string(bodyBytes)
@@ -122,8 +140,15 @@ func getInput(year string, day string) (string, error) {
 	// Setup the request...
 	url := fmt.Sprintf("https://adventofcode.com/%s/day/%s/input", year, day)
 
-	response := requestData(url)
+	response, err := requestData(url)
+	if err != nil {
+		return "", err
+	}
 	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return "", fmt.Errorf("status code: %s", fmt.Sprint(response.StatusCode))
+	}
 
 	bodyBytes, _ := io.ReadAll(response.Body)
 	body := string(bodyBytes)
