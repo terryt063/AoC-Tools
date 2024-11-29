@@ -1,6 +1,6 @@
 module github.com/terryt063/AoC-Tools
 
-go 1.21.4
+go 1.18
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.4.2

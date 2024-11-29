@@ -34,7 +34,7 @@ func main() {
 				log.Println(err.Error())
 				os.Exit(1)
 			}
-			time.Sleep(30 * time.Second)
+			time.Sleep(200 * time.Nanosecond)
 		}
 	} else {
 		err := writeFiles(*yearFlag, *dayFlag)
